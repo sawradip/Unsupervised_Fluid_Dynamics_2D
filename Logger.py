@@ -27,7 +27,7 @@ class Logger():
 		if datetime:
 			self.datetime=datetime
 		else:
-			self.datetime = dt.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+			self.datetime = dt.datetime.now().strftime("%Y-%m-%d %H:%M:%S").replace(" ", "_").replace(":", "_")
 		
 		self.use_csv = use_csv
 		if use_csv:

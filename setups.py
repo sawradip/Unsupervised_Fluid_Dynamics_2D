@@ -1,6 +1,7 @@
 import torch
 import numpy as np
 from PIL import Image
+from derivatives import params
 
 # we can define domain boundaries inside these .png images.
 # These images were not taken into account during training to test the generalization performance of our models.
@@ -8,9 +9,9 @@ cyber_truck = (torch.mean(torch.tensor(np.asarray(Image.open('imgs/cyber.png')))
 fish = (torch.mean(torch.tensor(np.asarray(Image.open('imgs/fish.png'))).float(),dim=2)<100).float()
 smiley = (torch.mean(torch.tensor(np.asarray(Image.open('imgs/smiley.png'))).float(),dim=2)<100).float()
 wing = (torch.mean(torch.tensor(np.asarray(Image.open('imgs/wing_profile.png'))).float(),dim=2)<100).float()
-background1 = (torch.mean(torch.tensor(np.asarray(Image.open('imgs/background1.png'))).float(),dim=2)<100).float()
-background2 = (torch.mean(torch.tensor(np.asarray(Image.open('imgs/background2.png'))).float(),dim=2)<100).float()
-background3 = (torch.mean(torch.tensor(np.asarray(Image.open('imgs/background3.png'))).float(),dim=2)<100).float()
+background1 = (torch.mean(torch.tensor(np.asarray(Image.open('imgs/background1.png').resize((params.width, params.height)))).float(),dim=2)<100).float()
+background2 = (torch.mean(torch.tensor(np.asarray(Image.open('imgs/background2.png').resize((params.width, params.height)))).float(),dim=2)<100).float()
+background3 = (torch.mean(torch.tensor(np.asarray(Image.open('imgs/background3.png').resize((params.width, params.height)))).float(),dim=2)<100).float()
 
 images = {"cyber":cyber_truck, "fish":fish, "smiley":smiley, "wing":wing}
 backgrounds = {"empty":background1,"cave1":background2,"cave2":background3}
@@ -289,7 +290,8 @@ class Dataset:
 			object_h, object_w = image_mask.shape[0], image_mask.shape[1]
 			background_image = np.random.choice(self.background_images)
 			background_image_mask = backgrounds[background_image]
-			
+			# print(self.cond_mask.shape)
+			# print(background_image_mask.shape)
 			self.cond_mask[index,:] = 1-(1-self.cond_mask[index,:])*(1-background_image_mask)
 			self.cond_mask[index,:,(object_y-object_h//2):(object_y-object_h//2+object_h),(object_x-object_w//2):(object_x-object_w//2+object_w)] = 1-(1-self.cond_mask[index,:,(object_y-object_h//2):(object_y-object_h//2+object_h),(object_x-object_w//2):(object_x-object_w//2+object_w)])*(1-image_mask)
 			self.v_cond[index,:]=0

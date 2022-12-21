@@ -52,8 +52,8 @@ def params():
 	parser.add_argument('--target_freq', default=7, type=float, help='target frequency of optimal control algorithm (default: 7; choose value between 2-8)')
 
 	# Setup parameters
-	parser.add_argument('--width', default=300, type=int, help='setup width')
-	parser.add_argument('--height', default=100, type=int, help='setup height')
+	parser.add_argument('--width', default=600, type=int, help='setup width')
+	parser.add_argument('--height', default=200, type=int, help='setup height')
 	
 	# Fluid parameters
 	parser.add_argument('--rho', default=1, type=float, help='fluid density rho')
@@ -65,6 +65,8 @@ def params():
 	parser.add_argument('--load_index', default=None, type=int, help='index of run to load (default: None)')
 	parser.add_argument('--load_optimizer', default=False, type=str2bool, help='load state of optimizer (default: True)')
 	parser.add_argument('--load_latest', default=False, type=str2bool, help='load latest version for training (if True: leave load_date_time and load_index None. default: False)')
+
+	parser.add_argument('--save_movie', default=True, type=str2bool, help='Save Interactive Video (if True: saves video while running demo. default: False)')
 	
 	# parse parameters
 	params = parser.parse_args()
@@ -72,4 +74,4 @@ def params():
 	return params
 
 def get_hyperparam(params):
-	return f"net {params.net}; hs {params.hidden_size}; mu {params.mu}; rho {params.rho}; dt {params.dt};"
+	return f"net {params.net}_hs_{params.hidden_size}_mu_{params.mu}_rho_{params.rho}_dt_{params.dt}"

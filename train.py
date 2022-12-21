@@ -29,7 +29,7 @@ fluid_model.train()
 optimizer = Adam(fluid_model.parameters(),lr=params.lr)
 
 # initialize Logger and load model / optimizer if according parameters were given
-logger = Logger(get_hyperparam(params),use_csv=False,use_tensorboard=params.log)
+logger = Logger(get_hyperparam(params),use_csv=True,use_tensorboard=False)
 if params.load_latest or params.load_date_time is not None or params.load_index is not None:
 	load_logger = Logger(get_hyperparam(params),use_csv=False,use_tensorboard=False)
 	if params.load_optimizer:
@@ -52,12 +52,19 @@ for epoch in range(params.load_index,params.n_epochs):
 	for i in range(params.n_batches_per_epoch):
 		v_cond,cond_mask,flow_mask,a_old,p_old = toCuda(dataset.ask())
 		
+		# print(f"v_cond shape: {v_cond.shape}")
+		# print(f"cond_mask shape: {cond_mask.shape}")
+		# print(f"flow_mask shape: {flow_mask.shape}")
+		# print(f"a_old shape: {a_old.shape}")
+		# print(f"p_old shape: {p_old.shape}")
+
+		# break
 		# convert v_cond,cond_mask,flow_mask to MAC grid
 		v_cond = normal2staggered(v_cond)
 		cond_mask_mac = (normal2staggered(cond_mask.repeat(1,2,1,1))==1).float()
 		flow_mask_mac = (normal2staggered(flow_mask.repeat(1,2,1,1))>=0.5).float()
 		
-		v_old = rot_mac(a_old)
+		v_old = rot_mac(a_old) # v = curl a
 		
 		# predict new fluid state from old fluid state and boundary conditions using the neural fluid model
 		a_new,p_new = fluid_model(a_old,p_old,flow_mask,v_cond,cond_mask)
@@ -72,7 +79,7 @@ for epoch in range(params.load_index,params.n_epochs):
 		if params.integrator == "implicit":
 			v = v_new
 		if params.integrator == "imex":
-			v = (v_new+v_old)/2
+			v = (v_new + v_old)/2
 		
 		# compute loss for momentum equation
 		loss_nav =  torch.mean(loss_function(flow_mask_mac*(rho*((v_new[:,1:2]-v_old[:,1:2])/dt+v[:,1:2]*dx(v[:,1:2])+0.5*(map_vy2vx_top(v[:,0:1])*dy_top(v[:,1:2])+map_vy2vx_bottom(v[:,0:1])*dy_bottom(v[:,1:2])))+dx_left(p_new)-mu*laplace(v[:,1:2])))[:,:,1:-1,1:-1],dim=(1,2,3))+\
@@ -122,6 +129,7 @@ for epoch in range(params.load_index,params.n_epochs):
 			if i%100 == 0:
 				print(f"{epoch}: i:{i}: loss: {loss}; loss_bound: {loss_bound}; loss_nav: {loss_nav};")
 	
+
 	# safe state after every epoch
 	if params.log:
 		logger.save_state(fluid_model,optimizer,epoch+1)

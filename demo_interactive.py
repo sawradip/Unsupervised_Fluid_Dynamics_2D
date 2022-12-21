@@ -22,7 +22,7 @@ rho = params.rho
 dt = params.dt
 w,h = params.width,params.height
 n_time_steps=params.average_sequence_length
-save_movie=False#True#
+save_movie= params.save_movie #False#True#
 
 # load fluid model:
 logger = Logger(get_param.get_hyperparam(params),use_csv=False,use_tensorboard=False)
@@ -173,4 +173,5 @@ if save_movie:
 	movie_p.release()
 	movie_v.release()
 	movie_a.release()
+	print('Movie Saved')
 
