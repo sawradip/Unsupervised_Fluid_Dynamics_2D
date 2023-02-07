@@ -41,13 +41,19 @@ if params.load_latest or params.load_date_time is not None or params.load_index 
 params.load_index = 0 if params.load_index is None else params.load_index
 
 # initialize Dataset
-dataset = Dataset(params.width,params.height,params.batch_size,params.dataset_size,params.average_sequence_length,max_speed=params.max_speed,dt=params.dt)
+dataset = Dataset(params.width,
+					params.height,
+					params.batch_size,
+					params.dataset_size,
+					params.average_sequence_length,
+					max_speed=params.max_speed,
+					dt=params.dt)
 
 def loss_function(x):
 	return torch.pow(x,2)
 
 # training loop
-for epoch in range(params.load_index,params.n_epochs):
+for epoch in range(params.load_index, params.n_epochs):
 
 	for i in range(params.n_batches_per_epoch):
 		v_cond,cond_mask,flow_mask,a_old,p_old = toCuda(dataset.ask())
@@ -116,7 +122,7 @@ for epoch in range(params.load_index,params.n_epochs):
 		dataset.tell(toCpu(a_new),toCpu(p_new))
 		
 		# log training metrics
-		if i%10 == 0:
+		if i%5 == 0:
 			loss = toCpu(loss).numpy()
 			loss_bound = toCpu(torch.mean(loss_bound)).numpy()
 			loss_nav = toCpu(torch.mean(loss_nav)).numpy()
@@ -127,7 +133,7 @@ for epoch in range(params.load_index,params.n_epochs):
 			logger.log(f"regularize_grad_p",regularize_grad_p,epoch*params.n_batches_per_epoch+i)
 			
 			if i%100 == 0:
-				print(f"{epoch}: i:{i}: loss: {loss}; loss_bound: {loss_bound}; loss_nav: {loss_nav};")
+				print(f"Epoch {epoch}/{params.n_epochs}; iter:{i}/{params.n_batches_per_epoch}  loss: {loss}; loss_bound: {loss_bound}; loss_nav: {loss_nav};")
 	
 
 	# safe state after every epoch

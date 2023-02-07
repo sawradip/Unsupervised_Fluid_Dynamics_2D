@@ -43,6 +43,25 @@ cv2.imshow('legend',image)
 cv2.namedWindow('p',cv2.WINDOW_NORMAL)
 cv2.namedWindow('v',cv2.WINDOW_NORMAL)
 
+
+def torch_fft(input, signal_ndim, normalized=False):
+  if signal_ndim < 1 or signal_ndim > 3:
+    print("Signal ndim out of range, was", signal_ndim, "but expected a value between 1 and 3, inclusive")
+    return
+
+  dims = (-1)
+  if signal_ndim == 2:
+    dims = (-2, -1)
+  if signal_ndim == 3:
+    dims = (-3, -2, -1)
+
+  norm = "backward"
+  if normalized:
+    norm = "ortho"
+
+  return torch.view_as_real(torch.fft.fftn(torch.view_as_complex(input), dim=dims, norm=norm))
+
+
 #generate environment for fluid simulation
 def get_problem(w,h,object_x=50,object_y=50,object_w=5,object_h=10):
 	v_cond = toCuda(torch.zeros(1,2,h,w))
@@ -124,7 +143,7 @@ for epoch in range(200):
 		a_old, p_old = a_new, p_new
 	
 	# compute expectation value of vortex shedding frequency
-	fft_y_curve = torch.sum(torch.fft(velocity_y_curve*velocity_y_curve_scaler,signal_ndim=1,normalized=True)**2,dim=1)
+	fft_y_curve = torch.sum(torch_fft(velocity_y_curve*velocity_y_curve_scaler,signal_ndim=1,normalized=True)**2,dim=1)
 	norm_fft_y_curve = fft_y_curve[:15]/torch.sum(fft_y_curve[:15])
 	E_fft_y = torch.sum(norm_fft_y_curve*torch.arange(0,15).cuda())
 	

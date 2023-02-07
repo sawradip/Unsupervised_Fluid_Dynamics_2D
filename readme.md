@@ -95,7 +95,7 @@ If you want to have a look at the outcome of your freshly trained model, call:
 python demo_interactive.py --mu=0.5 --rho=4 --dt=4
 ```
 
-## Control of Vortex Shedding Frequency
+## Control of Vortex Sheqdding Frequency
 
 As our fluid models are fully differentiable, gradients of the fluid simulation can be easily computed with backpropagation through time. We demonstrate this in a proof of concept experiment that aims at controling the fluid velocity such that the vortex shedding frequency behind an obstacle matches a predefined target frequency.
 

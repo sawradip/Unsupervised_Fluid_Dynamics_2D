@@ -13,6 +13,7 @@ import warnings
 from natsort import natsorted
 import pickle
 
+
 class Logger():
 	
 	def __init__(self,name,datetime=None,use_csv=True,use_tensorboard=False):

@@ -25,7 +25,20 @@ tell(a,p): tell results for a(t+1),p(t+1) of batch
 
 
 class Dataset:
-	def __init__(self,w,h,batch_size=100,dataset_size=1000,average_sequence_length=5000,interactive=False,max_speed=3,brown_damping=0.9995,brown_velocity=0.005,init_velocity=0,init_rho=None,n_cond=False,dt=1,types=["magnus","box","pipe"],images=["cyber","fish","smiley","wing"],background_images=["empty"]):
+	def __init__(self,w,h,batch_size=100,
+				dataset_size=1000,
+				average_sequence_length=5000,
+				interactive=False,
+				max_speed=3,
+				brown_damping=0.9995,
+				brown_velocity=0.005,
+				init_velocity=0,
+				init_rho=None,
+				n_cond=False,
+				dt=1,
+				types=["magnus", "box", "pipe", "image"],
+				images=["wing", "cyber", "fish", "smiley"],
+				background_images=["empty", "cave1", "cave2"]):
 		"""
 		create dataset
 		:w: width of domains
@@ -60,7 +73,7 @@ class Dataset:
 		self.p = torch.zeros(dataset_size,1,h,w)
 		self.v_cond = torch.zeros(dataset_size,2,h,w)# one could also think about p_cond... -> neumann
 		self.cond_mask = torch.zeros(dataset_size,1,h,w)
-		self.padding_x,self.padding_y = 5,3
+		self.padding_x , self.padding_y = 5,3
 		self.n_cond = n_cond
 		if n_cond:
 			self.n_cond_mask = torch.zeros(dataset_size,1,h,w)#neumann condition mask
@@ -174,7 +187,7 @@ class Dataset:
 			object_vx,object_vy,object_w = 0,0,0 # object angular velocity
 			
 			# 1. generate mesh 2 x [2r x 2r]
-			y_mesh,x_mesh = torch.meshgrid([torch.arange(-object_r,object_r+1),torch.arange(-object_r,object_r+1)])
+			y_mesh, x_mesh = torch.meshgrid([torch.arange(-object_r,object_r+1),torch.arange(-object_r,object_r+1)])
 			
 			# 2. generate mask
 			mask_ball = ((x_mesh**2+y_mesh**2)<object_r**2).float().unsqueeze(0)
@@ -672,13 +685,37 @@ class Dataset:
 		
 		self.indices = np.random.choice(self.dataset_size,self.batch_size)
 		self.update_envs(self.indices)
+
 		if self.n_cond and self.init_rho is not None:
-			return self.v_cond[self.indices],self.cond_mask[self.indices],self.flow_mask[self.indices],self.a[self.indices],self.p[self.indices],self.rho[self.indices],self.n_cond_mask[self.indices]
+			return self.v_cond[self.indices],		\
+					self.cond_mask[self.indices],	\
+					self.flow_mask[self.indices],	\
+					self.a[self.indices],			\
+					self.p[self.indices],			\
+					self.rho[self.indices],			\
+					self.n_cond_mask[self.indices]
+
 		if self.n_cond:
-			return self.v_cond[self.indices],self.cond_mask[self.indices],self.flow_mask[self.indices],self.a[self.indices],self.p[self.indices],self.n_cond_mask[self.indices]
+			return self.v_cond[self.indices],		\
+					self.cond_mask[self.indices],	\
+					self.flow_mask[self.indices],	\
+					self.a[self.indices],			\
+					self.p[self.indices],			\
+					self.n_cond_mask[self.indices]
+
 		if self.init_rho is not None:
-			return self.v_cond[self.indices],self.cond_mask[self.indices],self.flow_mask[self.indices],self.a[self.indices],self.p[self.indices],self.rho[self.indices]
-		return self.v_cond[self.indices],self.cond_mask[self.indices],self.flow_mask[self.indices],self.a[self.indices],self.p[self.indices]
+			return self.v_cond[self.indices],		\
+					self.cond_mask[self.indices],	\
+					self.flow_mask[self.indices],	\
+					self.a[self.indices],			\
+					self.p[self.indices],			\
+					self.rho[self.indices]			
+
+		return self.v_cond[self.indices],	\
+			self.cond_mask[self.indices],	\
+			self.flow_mask[self.indices],	\
+			self.a[self.indices],			\
+			self.p[self.indices]
 	
 	def tell(self,a,p,rho=None):
 		"""
